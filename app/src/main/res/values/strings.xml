@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">GPA Calculator</string>
     <string name="action_settings">Settings</string>
-    <string name ="add_a_semester">Add A Semester</string>
-    <string name ="cumulative_gpa">"Cumulative GPA: 3.50</string>
+    <string name="add_a_semester">Add A Semester</string>
+    <string name="add_a_course">Add A Course</string>
+    <string name="cumulative_gpa">Cumulative GPA: N/A</string>
+    <string name="semester_gpa">Semester GPA: N/A</string>
+    <string name="title_activity_course_list">CourseListActivity</string>
 </resources>

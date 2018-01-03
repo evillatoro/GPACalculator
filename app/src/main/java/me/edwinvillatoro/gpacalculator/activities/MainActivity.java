@@ -1,6 +1,7 @@
 package me.edwinvillatoro.gpacalculator.activities;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
@@ -24,6 +25,7 @@ import me.edwinvillatoro.gpacalculator.model.Semester;
 
 public class MainActivity extends AppCompatActivity implements SemesterRecyclerViewAdapter.SemesterCallBack {
 
+    public static final String CLICKED_SEMESTER_NAME ="semesterName";
     private RecyclerView mSemesterRecyclerView;
     private ArrayList<Semester> mSemesterList;
     private TextView mAddSemesterLabel;
@@ -34,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_activity_toolbar);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
 
     private void getSemesters() {
         mSemesterList = new ArrayList<>();
-
+        mSemesterList.add(new Semester("Spring 2018"));
         mSemesterRecyclerViewAdapter = new SemesterRecyclerViewAdapter(mSemesterList, this);
         mSemesterRecyclerView.setAdapter(mSemesterRecyclerViewAdapter);
         mSemesterRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
@@ -96,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
             mAddSemesterLabel.setVisibility(View.INVISIBLE);
         }
         mSemesterRecyclerViewAdapter.notifyDataSetChanged();
+        toastMessage("Refreshed Semesters");
     }
 
     private void removeSemester(int p) {
@@ -105,7 +108,10 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
 
     @Override
     public void OnSemesterClick(int p) {
-
+        Semester clickedSemester = mSemesterList.get(p);
+        Intent intent = new Intent(this, CourseListActivity.class);
+        intent.putExtra(CLICKED_SEMESTER_NAME, clickedSemester.getName());
+        startActivity(intent);
     }
 
     @Override
@@ -156,5 +162,12 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getSemesters();
+        toastMessage("On Resume Called");
     }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/semester_container"
+    android:id="@+id/courseContainer"
     android:layout_width="match_parent"
     android:layout_height="72dp"
     android:paddingTop="8dp"
@@ -19,16 +19,15 @@
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
-
         <TextView
-            android:id="@+id/text_view_semester_name"
+            android:id="@+id/text_view_course_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:text="Spring 2018" />
+            android:text="CS 1331" />
 
         <TextView
-            android:id="@+id/text_view_semester_credits"
+            android:id="@+id/text_view_course_credits"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
@@ -39,21 +38,21 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/text_view_semester_gpa"
-        android:layout_alignBottom="@+id/text_view_semester_gpa"
+        android:layout_alignBaseline="@+id/text_view_course_grade"
+        android:layout_alignBottom="@+id/text_view_course_grade"
         android:layout_marginEnd="27dp"
         android:layout_marginRight="27dp"
-        android:layout_toLeftOf="@+id/text_view_semester_gpa"
-        android:layout_toStartOf="@+id/text_view_semester_gpa"
+        android:layout_toLeftOf="@+id/text_view_course_grade"
+        android:layout_toStartOf="@+id/text_view_course_grade"
         android:textSize="16sp"
-        android:text="GPA: " />
+        android:text="Grade:" />
 
     <TextView
-        android:id="@+id/text_view_semester_gpa"
+        android:id="@+id/text_view_course_grade"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
         android:text="4.00"
+        android:textSize="16sp"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
