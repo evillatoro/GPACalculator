@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/pref_header_calculations">
+
+        <ListPreference
+            android:key="@string/key_decimal_places"
+            android:defaultValue="2"
+            android:dialogTitle="@string/title_decimal_places"
+            android:entries="@array/pref_decimal_place_entries"
+            android:entryValues="@array/pref_decimal_place_values"
+            android:summary="@string/summary_decimal_places"
+            android:title="@string/title_decimal_places"/>
+
+        <Preference
+            android:key="@string/key_edit_grade_scale"
+            android:selectable="true"
+            android:title="@string/title_edit_grade_scale"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_header_about">
+
+    </PreferenceCategory>
+</PreferenceScreen>

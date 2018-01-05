@@ -2,10 +2,12 @@ package me.edwinvillatoro.gpacalculator.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -60,7 +62,21 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mSemesterRecyclerView.setLayoutManager(linearLayoutManager);
 
+        getUserPreferences();
+
         getSemesters();
+        toastMessage("On create called");
+}
+
+    private void getUserPreferences() {
+        // sets all the defaults
+        //PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String decimalPlacesPref = sharedPref.getString
+                (SettingsActivity.KEY_DECIMAL_PLACES, "2");
+
+        toastMessage("Current Decimals: " + decimalPlacesPref);
     }
 
     private void getSemesters() {
@@ -83,7 +99,11 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
                     public void onClick(DialogInterface dialog, int which) {
                         String semesterName = taskEditText.getText().toString();
                         mSemesterList.add(new Semester(semesterName));
-                        updateView();
+
+                        //TODO: Decide whether to go directly to CourseList or stay
+                        //updateView();
+                        goToCourseListIntent(semesterName);
+
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -109,9 +129,7 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
     @Override
     public void OnSemesterClick(int p) {
         Semester clickedSemester = mSemesterList.get(p);
-        Intent intent = new Intent(this, CourseListActivity.class);
-        intent.putExtra(CLICKED_SEMESTER_NAME, clickedSemester.getName());
-        startActivity(intent);
+        goToCourseListIntent(clickedSemester.getName());
     }
 
     @Override
@@ -132,6 +150,12 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
                         mSemesterRecyclerView.getAdapter().notifyItemChanged(p);
                     }
                 }).show();
+    }
+
+    private void goToCourseListIntent(String semesterName) {
+        Intent intent = new Intent(this, CourseListActivity.class);
+        intent.putExtra(CLICKED_SEMESTER_NAME, semesterName);
+        startActivity(intent);
     }
 
     /**
@@ -158,6 +182,8 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -168,6 +194,5 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
     protected void onResume() {
         super.onResume();
         getSemesters();
-        toastMessage("On Resume Called");
     }
 }
