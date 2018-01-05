@@ -78,13 +78,11 @@ public class SemesterRecyclerViewAdapter extends RecyclerView.Adapter<SemesterRe
 
         @Override
         public void onClick(View v) {
-            toastMessage("Click");
             semesterCallBack.OnSemesterClick(getAdapterPosition());
         }
 
         @Override
         public boolean onLongClick(View v) {
-            toastMessage("Long Click");
             semesterCallBack.OnSemesterLongClick(getAdapterPosition());
             return true;
         }

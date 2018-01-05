@@ -78,13 +78,11 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<CourseRecycl
 
         @Override
         public void onClick(View v) {
-            toastMessage("Click");
             courseCallBack.OnCourseClick(getAdapterPosition());
         }
 
         @Override
         public boolean onLongClick(View v) {
-            toastMessage("Long Click");
             courseCallBack.OnCourseLongClick(getAdapterPosition());
             return true;
         }

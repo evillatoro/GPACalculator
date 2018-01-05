@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import me.edwinvillatoro.gpacalculator.R;
 import me.edwinvillatoro.gpacalculator.adapters.GradeScaleRecyclerViewAdapter;
 import me.edwinvillatoro.gpacalculator.model.Grade;
-import me.edwinvillatoro.gpacalculator.model.Semester;
 
 public class EditGradeScaleActivity extends AppCompatActivity implements GradeScaleRecyclerViewAdapter.GradeCallBack{
 
@@ -27,11 +26,7 @@ public class EditGradeScaleActivity extends AppCompatActivity implements GradeSc
     private GradeScaleRecyclerViewAdapter mGradeScaleRecyclerViewAdapter;
     private AlertDialog mAlertDialog;
     private SharedPreferences mPreferences;
-    private String sharedPrefFile = "me.edwinvillatoro.gpacalculator";
-
-    private String[] mLetters;
-
-    private double[] mPoints;
+    private String mSharedPrefFile = "me.edwinvillatoro.gpacalculator";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +38,7 @@ public class EditGradeScaleActivity extends AppCompatActivity implements GradeSc
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mGradeScaleRecyclerView.setLayoutManager(linearLayoutManager);
 
-        mLetters = new String[]{"A+", "A", "A-",
-                        "B+", "B", "B-",
-                        "C+", "C", "C-",
-                        "D+", "D", "D-",
-                        "F"};
-        mPoints = new double[mLetters.length];
-
-        mPreferences = getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+        mPreferences = getSharedPreferences(mSharedPrefFile, MODE_PRIVATE);
 
         getGradePreferences();
     }

@@ -48,6 +48,16 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.SettingsActivity" />
         </activity>
+        <activity
+            android:name=".activities.AddEditCourseActivity"
+            android:label="@string/title_add_edit_course"
+            android:parentActivityName=".activities.CourseListActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:targetApi="jelly_bean">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.CourseListActivity" />
+        </activity>
     </application>
 
 </manifest>

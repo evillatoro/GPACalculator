@@ -73,7 +73,6 @@ public class GradeScaleRecyclerViewAdapter extends RecyclerView.Adapter<GradeSca
 
         @Override
         public void onClick(View v) {
-            toastMessage("Click");
             gradeCallBack.OnGradeClick(getAdapterPosition());
         }
     }

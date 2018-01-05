@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         getUserPreferences();
 
         getSemesters();
-        toastMessage("OnCreate Called");
+       // toastMessage("OnCreate Called");
 }
 
     private void getUserPreferences() {
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         String decimalPlacesPref = sharedPref.getString
                 (SettingsActivity.KEY_DECIMAL_PLACES, "2");
 
-        toastMessage("Current Decimals: " + decimalPlacesPref);
+        //toastMessage("Current Decimals: " + decimalPlacesPref);
     }
 
     private void getSemesters() {
@@ -92,8 +92,9 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
 
     private void addSemester() {
         final EditText taskEditText = new EditText(this);
+        taskEditText.setHint("Semester Name");
         mAlertDialog = new AlertDialog.Builder(this)
-                .setTitle("Add a new semester")
+                .setTitle("Add a New Semester")
                 .setView(taskEditText)
                 .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override

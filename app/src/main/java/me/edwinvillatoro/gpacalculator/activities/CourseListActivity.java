@@ -1,7 +1,10 @@
 package me.edwinvillatoro.gpacalculator.activities;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -10,6 +13,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -21,29 +25,47 @@ import me.edwinvillatoro.gpacalculator.R;
 import me.edwinvillatoro.gpacalculator.adapters.CourseRecyclerViewAdapter;
 import me.edwinvillatoro.gpacalculator.adapters.SemesterRecyclerViewAdapter;
 import me.edwinvillatoro.gpacalculator.model.Course;
+import me.edwinvillatoro.gpacalculator.model.Grade;
 import me.edwinvillatoro.gpacalculator.model.Semester;
 
 public class CourseListActivity extends AppCompatActivity implements CourseRecyclerViewAdapter.CourseCallBack {
 
+    private static final String TAG = "CourseListActivity";
     private RecyclerView mCourseRecyclerView;
     private ArrayList<Course> mCourseList;
     private TextView mAddCourseLabel;
     private CourseRecyclerViewAdapter mCourseRecyclerViewAdapter;
     private AlertDialog mAlertDialog;
+    private Toolbar toolbar;
+    private String semesterName;
+    private Bundle bundle;
+    static final String KEY_SEMESTER_NAME = "semesterName";
+
+    private SharedPreferences mPreferences;
+    private String mSharedPrefFile = "me.edwinvillatoro.gpacalculator";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_list);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.course_list_toolbar);
 
+        mPreferences = getSharedPreferences(mSharedPrefFile, MODE_PRIVATE);
+
+        toolbar = (Toolbar) findViewById(R.id.course_list_toolbar);
         Bundle bundle = getIntent().getExtras();
         // set activity title to semester name
         if (bundle != null) {
-            String semesterName = bundle.getString(MainActivity.CLICKED_SEMESTER_NAME);
-            toolbar.setTitle(semesterName);
+            semesterName = bundle.getString(MainActivity.CLICKED_SEMESTER_NAME);
+            SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+
+            preferencesEditor.putString(KEY_SEMESTER_NAME, semesterName);
+            preferencesEditor.apply();
         }
-        setSupportActionBar(toolbar);
+        setUpToolBar();
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -52,10 +74,6 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
                 addCourse();
             }
         });
-
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
 
         mAddCourseLabel = (TextView) findViewById(R.id.text_view_add_course_message);
         mAddCourseLabel.setOnClickListener(new View.OnClickListener() {
@@ -70,7 +88,28 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mCourseRecyclerView.setLayoutManager(linearLayoutManager);
 
+        toastMessage("on create");
+        
         getCourses();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        toastMessage("on resume");
+        semesterName = mPreferences.getString(KEY_SEMESTER_NAME,"");
+        setUpToolBar();
+    }
+
+    private void setUpToolBar() {
+        toolbar.setTitle(semesterName);
+        setSupportActionBar(toolbar);
     }
 
     private void getCourses() {
@@ -84,21 +123,8 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
     }
 
     private void addCourse() {
-        final EditText taskEditText = new EditText(this);
-        mAlertDialog = new AlertDialog.Builder(this)
-                .setTitle("Add a new course")
-                .setView(taskEditText)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String courseName = taskEditText.getText().toString();
-                        mCourseList.add(new Course(courseName));
-                        updateView();
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .create();
-        mAlertDialog.show();
+        Intent intent = new Intent(this, AddEditCourseActivity.class);
+        startActivity(intent);
     }
 
     private void updateView() {
@@ -117,7 +143,8 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
 
     @Override
     public void OnCourseClick(int p) {
-
+        Intent intent = new Intent(this, AddEditCourseActivity.class);
+        startActivity(intent);
     }
 
     @Override
