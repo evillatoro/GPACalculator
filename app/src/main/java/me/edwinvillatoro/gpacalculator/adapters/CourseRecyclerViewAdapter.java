@@ -71,7 +71,7 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<CourseRecycl
             courseCredits = view.findViewById(R.id.text_view_course_credits);
             courseGrade = view.findViewById(R.id.text_view_course_grade);
 
-            container = view.findViewById(R.id.courseContainer);
+            container = view.findViewById(R.id.course_container);
             container.setOnClickListener(this);
             container.setOnLongClickListener(this);
         }

@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         getUserPreferences();
 
         getSemesters();
-        toastMessage("On create called");
+        toastMessage("OnCreate Called");
 }
 
     private void getUserPreferences() {
@@ -109,6 +110,8 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
                 .setNegativeButton("Cancel", null)
                 .create();
         mAlertDialog.show();
+        mAlertDialog.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     private void updateView() {
