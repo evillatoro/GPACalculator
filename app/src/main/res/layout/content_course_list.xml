@@ -10,12 +10,12 @@
     tools:showIn="@layout/activity_course_list">
 
     <RelativeLayout
-        android:id="@+id/topSection"
+        android:id="@+id/top_section"
         android:layout_width="match_parent"
         android:layout_height="50dp">
 
         <TextView
-            android:id="@+id/semesterGPALabel"
+            android:id="@+id/text_view_semester_gpa"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -32,7 +32,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/topSection"
+        android:layout_below="@+id/top_section"
         android:background="@color/white" />
 
     <TextView

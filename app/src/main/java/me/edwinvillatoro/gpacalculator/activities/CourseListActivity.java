@@ -87,22 +87,13 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mCourseRecyclerView.setLayoutManager(linearLayoutManager);
-
-        toastMessage("on create");
         
         getCourses();
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
-        toastMessage("on resume");
         semesterName = mPreferences.getString(KEY_SEMESTER_NAME,"");
         setUpToolBar();
     }

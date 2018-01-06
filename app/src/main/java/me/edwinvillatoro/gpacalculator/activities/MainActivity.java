@@ -12,6 +12,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,18 +21,23 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import me.edwinvillatoro.gpacalculator.R;
 import me.edwinvillatoro.gpacalculator.adapters.SemesterRecyclerViewAdapter;
+import me.edwinvillatoro.gpacalculator.database.DatabaseOpenHelper;
 import me.edwinvillatoro.gpacalculator.model.Semester;
 
 public class MainActivity extends AppCompatActivity implements SemesterRecyclerViewAdapter.SemesterCallBack {
 
+    private static final String TAG = "MainActivity";
+
     public static final String CLICKED_SEMESTER_NAME ="semesterName";
+
+    private DatabaseOpenHelper mDatabaseOpenHelper;
     private RecyclerView mSemesterRecyclerView;
-    private ArrayList<Semester> mSemesterList;
-    private TextView mAddSemesterLabel;
+    private List<Semester> mSemesterList;
+    private TextView mAddSemesterLabel, mCumulativeGPALabel;
     private SemesterRecyclerViewAdapter mSemesterRecyclerViewAdapter;
     private AlertDialog mAlertDialog;
 
@@ -42,11 +48,13 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_activity_toolbar);
         setSupportActionBar(toolbar);
 
+        mDatabaseOpenHelper = new DatabaseOpenHelper(this);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addSemester();
+                showAddSemesterDialog();
             }
         });
 
@@ -54,20 +62,24 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         mAddSemesterLabel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addSemester();
+                showAddSemesterDialog();
             }
         });
+
+        mCumulativeGPALabel = (TextView) findViewById(R.id.text_view_cumulative_gpa);
 
         mSemesterRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_semester);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mSemesterRecyclerView.setLayoutManager(linearLayoutManager);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         getUserPreferences();
-
-        getSemesters();
-       // toastMessage("OnCreate Called");
-}
+        getAllSemesters();
+    }
 
     private void getUserPreferences() {
         // sets all the defaults
@@ -76,21 +88,22 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String decimalPlacesPref = sharedPref.getString
                 (SettingsActivity.KEY_DECIMAL_PLACES, "2");
-
-        //toastMessage("Current Decimals: " + decimalPlacesPref);
     }
 
-    private void getSemesters() {
-        mSemesterList = new ArrayList<>();
-        mSemesterList.add(new Semester("Spring 2018"));
+    private void getAllSemesters() {
+        Log.d(TAG, "getAllSemestersFromDatabase: getting semesters");
+        mSemesterList = mDatabaseOpenHelper.getAllSemestersFromDatabase();
+
+        mCumulativeGPALabel.setText(R.string.cumulative_gpa);
+
         mSemesterRecyclerViewAdapter = new SemesterRecyclerViewAdapter(mSemesterList, this);
         mSemesterRecyclerView.setAdapter(mSemesterRecyclerViewAdapter);
         mSemesterRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mSemesterRecyclerViewAdapter.setSemesterCallBack(this);
-        updateView();
+        refreshView();
     }
 
-    private void addSemester() {
+    private void showAddSemesterDialog() {
         final EditText taskEditText = new EditText(this);
         taskEditText.setHint("Semester Name");
         mAlertDialog = new AlertDialog.Builder(this)
@@ -100,12 +113,7 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String semesterName = taskEditText.getText().toString();
-                        mSemesterList.add(new Semester(semesterName));
-
-                        //TODO: Decide whether to go directly to CourseList or stay
-                        //updateView();
-                        goToCourseListIntent(semesterName);
-
+                        addSemester(semesterName);
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -115,19 +123,38 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
-    private void updateView() {
+    private void showDeleteSemesterDialog(final int p) {
+        mAlertDialog = new AlertDialog.Builder(this)
+                .setTitle("Delete Semester")
+                .setMessage("Delete " + mSemesterList.get(p).getName() + "?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        deleteSemester(p);
+                    }})
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mSemesterRecyclerView.getAdapter().notifyItemChanged(p);
+                    }
+                }).show();
+    }
+
+    private void addSemester(String semesterName) {
+        if (mDatabaseOpenHelper.addSemesterToDatabase(semesterName)) {
+            goToCourseListIntent(semesterName);
+        } else {
+            toastMessage(semesterName + " semester already exists.");
+        }
+    }
+
+    private void refreshView() {
         if (mSemesterList.size() == 0) {
             mAddSemesterLabel.setVisibility(View.VISIBLE);
         } else {
             mAddSemesterLabel.setVisibility(View.INVISIBLE);
         }
         mSemesterRecyclerViewAdapter.notifyDataSetChanged();
-        toastMessage("Refreshed Semesters");
-    }
-
-    private void removeSemester(int p) {
-        mSemesterList.remove(p);
-        updateView();
     }
 
     @Override
@@ -138,22 +165,15 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
 
     @Override
     public void OnSemesterLongClick(final int p) {
-        mAlertDialog = new AlertDialog.Builder(this)
-                .setTitle("Delete Semester")
-                .setMessage("Delete " + mSemesterList.get(p).getName() + "?")
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+        showDeleteSemesterDialog(p);
+    }
 
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        toastMessage("Deleted " + mSemesterList.get(p).getName());
-                        removeSemester(p);
-                    }})
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mSemesterRecyclerView.getAdapter().notifyItemChanged(p);
-                    }
-                }).show();
+    private void deleteSemester(int p) {
+        String semesterNameToDelete = mSemesterList.get(p).getName();
+        toastMessage("Deleted " + semesterNameToDelete);
+        mSemesterList.remove(p);
+        mDatabaseOpenHelper.deleteSemesterFromDatabase(semesterNameToDelete);
+        refreshView();
     }
 
     private void goToCourseListIntent(String semesterName) {
@@ -194,9 +214,4 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        getSemesters();
-    }
 }
