@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -106,11 +107,51 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
 
         mSemesterGPALabel.setText(R.string.semester_gpa);
 
+        calculateSemesterGPA();
+
         mCourseRecyclerViewAdapter = new CourseRecyclerViewAdapter(mCourseList, this);
         mCourseRecyclerView.setAdapter(mCourseRecyclerViewAdapter);
         mCourseRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mCourseRecyclerViewAdapter.setCourseCallBack(this);
         refreshView();
+    }
+
+    private void calculateSemesterGPA() {
+        if (mCourseList.size() != 0) {
+            double semesterGPA;
+            double cumulativeSemesterCredits = 0.0;
+            double cumulativeQualityPoints = 0.0;
+            int numberOfCoursesThatCount = 0;
+            for (Course s : mCourseList) {
+                if (s.getGrade() != -1) {
+                    numberOfCoursesThatCount++;
+                    cumulativeQualityPoints += s.getQualityPoints();
+                    cumulativeSemesterCredits += s.getCredits();
+                }
+            }
+
+            if (numberOfCoursesThatCount != 0) {
+                semesterGPA = cumulativeQualityPoints / cumulativeSemesterCredits;
+
+                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+                int numberOfDecimals = Integer.parseInt(sharedPref.getString
+                        (SettingsActivity.KEY_DECIMAL_PLACES, "2"));
+                String cumulativeGPAString;
+
+                if (numberOfDecimals == 1) {
+                    semesterGPA = Math.round(semesterGPA * 10.0) / 10.0;
+                    cumulativeGPAString = String.format( "%.1f", semesterGPA );
+                } else if (numberOfDecimals == 2) {
+                    semesterGPA = Math.round(semesterGPA * 100.0) / 100.0;
+                    cumulativeGPAString = String.format( "%.2f", semesterGPA );
+                } else {
+                    semesterGPA = Math.round(semesterGPA * 1000.0) / 1000.0;
+                    cumulativeGPAString = String.format( "%.3f", semesterGPA );
+                }
+
+                mSemesterGPALabel.setText("SEMESTER GPA: " + cumulativeGPAString);
+            }
+        }
     }
 
     private void addCourse() {
