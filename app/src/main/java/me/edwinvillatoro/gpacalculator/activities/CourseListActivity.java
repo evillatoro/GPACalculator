@@ -175,7 +175,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         toastMessage("Deleted " + course.getName());
         mCourseList.remove(p);
         mDatabaseOpenHelper.deleteCourseFromDatabase(course);
-        refreshView();
+        getCourses();
     }
 
     @Override
