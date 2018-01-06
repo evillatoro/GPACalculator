@@ -11,7 +11,6 @@
     android:background="@color/white">
 
     <LinearLayout
-        android:id="@+id/linearLayout"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,13 +19,12 @@
         android:paddingTop="8dp">
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/courseNameInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Course Name">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/courseNameEditText"
+                android:id="@+id/edit_text_course_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textCapSentences"
@@ -34,13 +32,12 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/courseCreditInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Course credit">
+            android:hint="Course Credits">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/courseCreditEditText"
+                android:id="@+id/edit_text_course_credits"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number|numberDecimal"
@@ -75,7 +72,7 @@
             android:layout_height="wrap_content"
             android:weightSum="4"
             android:paddingTop="8dp"
-            android:id="@+id/countTowardsGPARadioGroup">
+            android:id="@+id/radio_group_predicted">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -92,8 +89,7 @@
                 android:layout_height="wrap_content"
                 android:text="Yes"
                 android:layout_weight="1"
-                android:textSize="18sp"
-                android:checked="true"/>
+                android:textSize="18sp"/>
 
             <android.support.v7.widget.AppCompatRadioButton
                 android:id="@+id/noRadioButton"
@@ -101,11 +97,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textSize="18sp"
-                android:text="No" />
+                android:text="No"
+                android:checked="true"/>
         </RadioGroup>
 
     </LinearLayout>
-
-
 
 </RelativeLayout>

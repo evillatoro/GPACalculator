@@ -3,6 +3,7 @@ package me.edwinvillatoro.gpacalculator.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.edwinvillatoro.gpacalculator.database.DatabaseContract.DatabaseSemester;
+import me.edwinvillatoro.gpacalculator.database.DatabaseContract.DatabaseCourse;
+import me.edwinvillatoro.gpacalculator.model.Course;
 import me.edwinvillatoro.gpacalculator.model.Semester;
 
 /**
@@ -19,7 +22,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseOpenHelper";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "gpa_calculator_database";
 
     public DatabaseOpenHelper(Context context) {
@@ -29,11 +32,18 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(DatabaseSemester.CREATE_TABLE);
+        db.execSQL(DatabaseCourse.CREATE_TABLE);
+    }
+
+    @Override
+    public void onConfigure(SQLiteDatabase db) {
+        db.setForeignKeyConstraintsEnabled(true);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + DatabaseSemester.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DatabaseCourse.TABLE_NAME);
         onCreate(db);
     }
 
@@ -50,12 +60,41 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         return result != -1;
     }
 
+    public boolean addCourseToDatabase(Course course) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DatabaseCourse.COLUMN_COURSE_NAME, course.getName());
+        contentValues.put(DatabaseCourse.COLUMN_COURSE_SEMESTER, course.getSemester());
+        contentValues.put(DatabaseCourse.COLUMN_COURSE_CREDITS, course.getCredits());
+        contentValues.put(DatabaseCourse.COLUMN_COURSE_GRADE, course.getGrade());
+        contentValues.put(DatabaseCourse.COLUMN_COURSE_PREDICTED, course.getPredicted());
+
+        long result = db.insert(DatabaseCourse.TABLE_NAME, null, contentValues);
+
+        db.close();
+        // if result equals -1, course was not inserted
+        return result != -1;
+    }
+
     public void deleteSemesterFromDatabase(String semesterName) {
         SQLiteDatabase db = this.getWritableDatabase();
         String selection =
                 DatabaseSemester.COLUMN_SEMESTER_NAME + " = ?";
         String[] selectionArgs = { semesterName};
         db.delete(DatabaseSemester.TABLE_NAME, selection, selectionArgs);
+        db.close();
+    }
+
+    public void deleteCourseFromDatabase(Course course) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String selection =
+                DatabaseCourse.COLUMN_COURSE_SEMESTER + " = ?"+
+                        "AND " + DatabaseCourse.COLUMN_COURSE_NAME + " = ?";
+
+        String[] selectionArgs = { course.getSemester(), course.getName()};
+
+        db.delete(DatabaseCourse.TABLE_NAME, selection, selectionArgs);
         db.close();
     }
 
@@ -74,5 +113,51 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         db.close();
         return semesterList;
 
+    }
+
+    public List<Course> getCoursesForSemesterFromDatabase(String semesterName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String query = "SELECT * FROM " + DatabaseCourse.TABLE_NAME + " WHERE "
+                + DatabaseCourse.COLUMN_COURSE_SEMESTER + "= \"" + semesterName + "\"";
+        List<Course> courseList = new ArrayList<>();
+        Cursor data = db.rawQuery(query, null);
+        while (data.moveToNext()) {
+            Course course = new Course(data.getString(0),
+                    data.getString(1),
+                    data.getDouble(2),
+                    data.getDouble(3),
+                    data.getInt(4));
+            courseList.add(course);
+        }
+
+        data.close();
+        db.close();
+        return courseList;
+    }
+
+    public boolean updateCourseInDatabase(Course course, String oldCourseName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DatabaseCourse.COLUMN_COURSE_NAME, course.getName());
+        contentValues.put(DatabaseCourse.COLUMN_COURSE_SEMESTER, course.getSemester());
+        contentValues.put(DatabaseCourse.COLUMN_COURSE_CREDITS, course.getCredits());
+        contentValues.put(DatabaseCourse.COLUMN_COURSE_GRADE, course.getGrade());
+        contentValues.put(DatabaseCourse.COLUMN_COURSE_PREDICTED, course.getPredicted());
+
+        String selection =
+                DatabaseCourse.COLUMN_COURSE_NAME + " = ?" +
+                        "AND " + DatabaseCourse.COLUMN_COURSE_SEMESTER + " = ?";
+
+        String[] selectionArgs = { oldCourseName, course.getSemester()};
+
+        try {
+            long result = db.update(DatabaseCourse.TABLE_NAME,
+                    contentValues, selection, selectionArgs);
+            return true;
+        } catch (SQLiteConstraintException e) {
+            return false;
+        }
     }
 }

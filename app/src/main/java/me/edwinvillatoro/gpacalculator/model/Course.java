@@ -10,19 +10,19 @@ public class Course {
     private double credits;
     private double grade;
     private double qualityPoints;
-    private int countTowardsGPA;
+    private int predicted;
 
     public Course(String name) {
-        this(name, "semester", 0,0, 1);
+        this(name, "semester", 0,0, 0);
     }
 
-    public Course(String name, String semester, double credits, double grade, int countTowardsGPA) {
+    public Course(String name, String semester, double credits, double grade, int predicted) {
         this.name = name;
         this.semester = semester;
         this.credits = credits;
         this.grade = grade;
         this.qualityPoints = credits * grade;
-        this.countTowardsGPA = countTowardsGPA;
+        this.predicted = predicted;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class Course {
         return semester;
     }
 
-    public int getCountTowardsGPA() {
-        return countTowardsGPA;
+    public int getPredicted() {
+        return predicted;
     }
 }

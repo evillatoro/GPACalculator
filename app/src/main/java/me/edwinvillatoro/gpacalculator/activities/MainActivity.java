@@ -182,14 +182,6 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         startActivity(intent);
     }
 
-    /**
-     * customizable toast message
-     * @param message message to display
-     */
-    private void toastMessage(String message){
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -214,4 +206,11 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * customizable toast message
+     * @param message message to display
+     */
+    private void toastMessage(String message){
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
 }
