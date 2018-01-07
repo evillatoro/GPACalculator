@@ -1,6 +1,8 @@
 package me.edwinvillatoro.gpacalculator.adapters;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.widget.Toast;
 import java.util.List;
 
 import me.edwinvillatoro.gpacalculator.R;
+import me.edwinvillatoro.gpacalculator.activities.SettingsActivity;
 import me.edwinvillatoro.gpacalculator.model.Semester;
 
 /**
@@ -45,7 +48,17 @@ public class SemesterRecyclerViewAdapter extends RecyclerView.Adapter<SemesterRe
         Semester semester = listData.get(position);
         holder.semesterName.setText(semester.getName());
         holder.semesterCredits.setText(semester.getCredits() + " Credits");
-        holder.semesterGPA.setText(semester.getGpa() + "");
+
+        if (semester.getCredits() == 0) {
+            holder.semesterGPA.setText("N/A");
+        } else {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.context);
+            int numberOfDecimals = Integer.parseInt(sharedPref.getString
+                    (SettingsActivity.KEY_DECIMAL_PLACES, "2"));
+            Double semesterGPA = semester.getGpa();
+            semesterGPA = Math.round(semesterGPA * Math.pow(10, numberOfDecimals)) / Math.pow(10, numberOfDecimals);
+            holder.semesterGPA.setText(semesterGPA + "");
+        }
     }
 
     @Override

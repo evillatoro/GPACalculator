@@ -111,8 +111,6 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         mSemester = mDatabaseOpenHelper.getCoursesForSemesterFromDatabase(mSemesterName);
         mCourseList = mSemester.getCourseList();
 
-        mSemesterGPALabel.setText(R.string.semester_gpa);
-
         setSemesterGPALabel();
 
         mCourseRecyclerViewAdapter = new CourseRecyclerViewAdapter(mCourseList, this);
@@ -122,16 +120,19 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
     }
 
     private void setSemesterGPALabel() {
+        mSemesterGPALabel.setText(R.string.semester_gpa);
         if (mCourseList.size() != 0) {
-            Double semesterGPA = mSemester.getGpa();
+            if (mSemester.getCredits() != 0) {
+                Double semesterGPA = mSemester.getGpa();
 
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-            int numberOfDecimals = Integer.parseInt(sharedPref.getString
-                    (SettingsActivity.KEY_DECIMAL_PLACES, "2"));
+                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+                int numberOfDecimals = Integer.parseInt(sharedPref.getString
+                        (SettingsActivity.KEY_DECIMAL_PLACES, "2"));
 
-            semesterGPA = Math.round(semesterGPA * Math.pow(10,numberOfDecimals)) / Math.pow(10,numberOfDecimals);
+                semesterGPA = Math.round(semesterGPA * Math.pow(10, numberOfDecimals)) / Math.pow(10, numberOfDecimals);
 
-            mSemesterGPALabel.setText("SEMESTER GPA: " + semesterGPA);
+                mSemesterGPALabel.setText("SEMESTER GPA: " + semesterGPA);
+            }
         }
     }
 

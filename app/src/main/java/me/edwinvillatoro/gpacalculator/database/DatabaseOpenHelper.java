@@ -105,7 +105,8 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         Cursor data = db.rawQuery(query, null);
         List<Semester> semesterList = new ArrayList<>();
         while (data.moveToNext()) {
-            Semester semester = new Semester(data.getString(0));
+            String semesterName = data.getString(0);
+            Semester semester = getCoursesForSemesterFromDatabase(semesterName);
             semesterList.add(0, semester);
         }
 

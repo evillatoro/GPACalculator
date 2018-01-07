@@ -74,7 +74,7 @@ public class AddEditCourseActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.add_edit_course_toolbar);
         mBundle = getIntent().getExtras();
-        // set activity title to course name
+
         if (mBundle != null) {
             semester = mBundle.getString(MainActivity.CLICKED_SEMESTER_NAME);
             mType = mBundle.getInt("type");

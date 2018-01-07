@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
     protected void onResume() {
         super.onResume();
         getUserPreferences();
-        getAllSemesters();
+        refreshView();
     }
 
     private void getUserPreferences() {
@@ -94,13 +94,12 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         Log.d(TAG, "getAllSemestersFromDatabase: getting semesters");
         mSemesterList = mDatabaseOpenHelper.getAllSemestersFromDatabase();
 
-        mCumulativeGPALabel.setText(R.string.cumulative_gpa);
+        setCumulativeGPALabel();
 
         mSemesterRecyclerViewAdapter = new SemesterRecyclerViewAdapter(mSemesterList, this);
         mSemesterRecyclerView.setAdapter(mSemesterRecyclerViewAdapter);
         mSemesterRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mSemesterRecyclerViewAdapter.setSemesterCallBack(this);
-        refreshView();
     }
 
     private void showAddSemesterDialog() {
@@ -148,7 +147,32 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
         }
     }
 
+    private void setCumulativeGPALabel() {
+        mCumulativeGPALabel.setText(R.string.cumulative_gpa);
+        if (mSemesterList.size() != 0) {
+            double cumulativeGPA;
+            double cumulativeSemesterCredits = 0.0;
+            double cumulativeQualityPoints = 0.0;
+            for (Semester semester : mSemesterList) {
+                cumulativeQualityPoints += semester.getQualityPoints();
+                cumulativeSemesterCredits += semester.getCredits();
+            }
+
+            if (cumulativeSemesterCredits != 0) {
+                cumulativeGPA = cumulativeQualityPoints / cumulativeSemesterCredits;
+                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+                int numberOfDecimals = Integer.parseInt(sharedPref.getString
+                        (SettingsActivity.KEY_DECIMAL_PLACES, "2"));
+
+                cumulativeGPA = Math.round(cumulativeGPA * Math.pow(10, numberOfDecimals)) / Math.pow(10, numberOfDecimals);
+
+                mCumulativeGPALabel.setText("CUMULATIVE GPA: " + cumulativeGPA);
+            }
+        }
+    }
+
     private void refreshView() {
+        getAllSemesters();
         if (mSemesterList.size() == 0) {
             mAddSemesterLabel.setVisibility(View.VISIBLE);
         } else {
