@@ -115,12 +115,12 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
     }
 
-    public List<Course> getCoursesForSemesterFromDatabase(String semesterName) {
+    public Semester getCoursesForSemesterFromDatabase(String semesterName) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         String query = "SELECT * FROM " + DatabaseCourse.TABLE_NAME + " WHERE "
                 + DatabaseCourse.COLUMN_COURSE_SEMESTER + "= \"" + semesterName + "\"";
-        List<Course> courseList = new ArrayList<>();
+        Semester semester = new Semester(semesterName);
         Cursor data = db.rawQuery(query, null);
         while (data.moveToNext()) {
             Course course = new Course(data.getString(0),
@@ -128,12 +128,12 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
                     data.getDouble(2),
                     data.getDouble(3),
                     data.getInt(4));
-            courseList.add(course);
+            semester.addCourse(course);
         }
 
         data.close();
         db.close();
-        return courseList;
+        return semester;
     }
 
     public boolean updateCourseInDatabase(Course course, String oldCourseName) {

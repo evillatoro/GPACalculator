@@ -125,14 +125,14 @@ public class MainActivity extends AppCompatActivity implements SemesterRecyclerV
 
     private void showDeleteSemesterDialog(final int p) {
         mAlertDialog = new AlertDialog.Builder(this)
-                .setTitle("Delete Semester")
+                .setTitle("Delete Semester?")
                 .setMessage("Delete " + mSemesterList.get(p).getName() + "?")
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         deleteSemester(p);
                     }})
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mSemesterRecyclerView.getAdapter().notifyItemChanged(p);

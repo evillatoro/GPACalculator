@@ -22,21 +22,24 @@ import me.edwinvillatoro.gpacalculator.R;
 import me.edwinvillatoro.gpacalculator.adapters.CourseRecyclerViewAdapter;
 import me.edwinvillatoro.gpacalculator.database.DatabaseOpenHelper;
 import me.edwinvillatoro.gpacalculator.model.Course;
+import me.edwinvillatoro.gpacalculator.model.Semester;
 
 public class CourseListActivity extends AppCompatActivity implements CourseRecyclerViewAdapter.CourseCallBack {
 
     private static final String TAG = "CourseListActivity";
 
     private DatabaseOpenHelper mDatabaseOpenHelper;
-    private RecyclerView mCourseRecyclerView;
-    private List<Course> mCourseList;
-    private TextView mAddCourseLabel, mSemesterGPALabel;
-    private CourseRecyclerViewAdapter mCourseRecyclerViewAdapter;
-    private AlertDialog mAlertDialog;
-    private Toolbar toolbar;
-    private String semesterName;
-    static final String KEY_SEMESTER_NAME = "semesterName";
 
+    private Toolbar mToolbar;
+    private RecyclerView mCourseRecyclerView;
+    private CourseRecyclerViewAdapter mCourseRecyclerViewAdapter;
+    private TextView mAddCourseLabel, mSemesterGPALabel;
+    private AlertDialog mAlertDialog;
+
+    private static final String KEY_SEMESTER_NAME = "semesterName";
+    private Semester mSemester;
+    private String mSemesterName;
+    private List<Course> mCourseList;
     private SharedPreferences mPreferences;
     private String mSharedPrefFile = "me.edwinvillatoro.gpacalculator";
 
@@ -47,17 +50,18 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
 
         mPreferences = getSharedPreferences(mSharedPrefFile, MODE_PRIVATE);
 
-        toolbar = (Toolbar) findViewById(R.id.course_list_toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.course_list_toolbar);
         Bundle bundle = getIntent().getExtras();
-        // set activity title to semester name
+
         if (bundle != null) {
-            semesterName = bundle.getString(MainActivity.CLICKED_SEMESTER_NAME);
+            mSemesterName = bundle.getString(MainActivity.CLICKED_SEMESTER_NAME);
             SharedPreferences.Editor preferencesEditor = mPreferences.edit();
 
-            preferencesEditor.putString(KEY_SEMESTER_NAME, semesterName);
+            preferencesEditor.putString(KEY_SEMESTER_NAME, mSemesterName);
             preferencesEditor.apply();
         }
-        setUpToolBar();
+        
+        setUpToolBarAndTitle();
 
         mDatabaseOpenHelper = new DatabaseOpenHelper(this);
 
@@ -69,7 +73,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addCourse();
+                goToAddCourseActivity();
             }
         });
 
@@ -77,7 +81,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         mAddCourseLabel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addCourse();
+                goToAddCourseActivity();
             }
         });
 
@@ -92,76 +96,54 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
     @Override
     protected void onResume() {
         super.onResume();
-        semesterName = mPreferences.getString(KEY_SEMESTER_NAME,"");
-        setUpToolBar();
-        getCourses();
+        mSemesterName = mPreferences.getString(KEY_SEMESTER_NAME,"");
+        setUpToolBarAndTitle();
+        refreshView();
     }
 
-    private void setUpToolBar() {
-        toolbar.setTitle(semesterName);
-        setSupportActionBar(toolbar);
+    private void setUpToolBarAndTitle() {
+        // set activity title to semester name
+        mToolbar.setTitle(mSemesterName);
+        setSupportActionBar(mToolbar);
     }
 
     private void getCourses() {
-        mCourseList = mDatabaseOpenHelper.getCoursesForSemesterFromDatabase(semesterName);
+        mSemester = mDatabaseOpenHelper.getCoursesForSemesterFromDatabase(mSemesterName);
+        mCourseList = mSemester.getCourseList();
 
         mSemesterGPALabel.setText(R.string.semester_gpa);
 
-        calculateSemesterGPA();
+        setSemesterGPALabel();
 
         mCourseRecyclerViewAdapter = new CourseRecyclerViewAdapter(mCourseList, this);
         mCourseRecyclerView.setAdapter(mCourseRecyclerViewAdapter);
         mCourseRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mCourseRecyclerViewAdapter.setCourseCallBack(this);
-        refreshView();
     }
 
-    private void calculateSemesterGPA() {
+    private void setSemesterGPALabel() {
         if (mCourseList.size() != 0) {
-            double semesterGPA;
-            double cumulativeSemesterCredits = 0.0;
-            double cumulativeQualityPoints = 0.0;
-            int numberOfCoursesThatCount = 0;
-            for (Course s : mCourseList) {
-                if (s.getGrade() != -1) {
-                    numberOfCoursesThatCount++;
-                    cumulativeQualityPoints += s.getQualityPoints();
-                    cumulativeSemesterCredits += s.getCredits();
-                }
-            }
+            Double semesterGPA = mSemester.getGpa();
 
-            if (numberOfCoursesThatCount != 0) {
-                semesterGPA = cumulativeQualityPoints / cumulativeSemesterCredits;
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            int numberOfDecimals = Integer.parseInt(sharedPref.getString
+                    (SettingsActivity.KEY_DECIMAL_PLACES, "2"));
 
-                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-                int numberOfDecimals = Integer.parseInt(sharedPref.getString
-                        (SettingsActivity.KEY_DECIMAL_PLACES, "2"));
-                String cumulativeGPAString;
+            semesterGPA = Math.round(semesterGPA * Math.pow(10,numberOfDecimals)) / Math.pow(10,numberOfDecimals);
 
-                if (numberOfDecimals == 1) {
-                    semesterGPA = Math.round(semesterGPA * 10.0) / 10.0;
-                    cumulativeGPAString = String.format( "%.1f", semesterGPA );
-                } else if (numberOfDecimals == 2) {
-                    semesterGPA = Math.round(semesterGPA * 100.0) / 100.0;
-                    cumulativeGPAString = String.format( "%.2f", semesterGPA );
-                } else {
-                    semesterGPA = Math.round(semesterGPA * 1000.0) / 1000.0;
-                    cumulativeGPAString = String.format( "%.3f", semesterGPA );
-                }
-
-                mSemesterGPALabel.setText("SEMESTER GPA: " + cumulativeGPAString);
-            }
+            mSemesterGPALabel.setText("SEMESTER GPA: " + semesterGPA);
         }
     }
 
-    private void addCourse() {
+    private void goToAddCourseActivity() {
         Intent intent = new Intent(this, AddEditCourseActivity.class);
-        intent.putExtra(MainActivity.CLICKED_SEMESTER_NAME, semesterName);
+        intent.putExtra(MainActivity.CLICKED_SEMESTER_NAME, mSemesterName);
         intent.putExtra("type", 0);
         startActivity(intent);
     }
 
     private void refreshView() {
+        getCourses();
         if (mCourseList.size() == 0) {
             mAddCourseLabel.setVisibility(View.VISIBLE);
         } else {
@@ -172,17 +154,16 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
 
     private void deleteCourse(int p) {
         Course course = mCourseList.get(p);
-        toastMessage("Deleted " + course.getName());
-        mCourseList.remove(p);
+        toastMessage("Deleted " + course.getName() + ".");
         mDatabaseOpenHelper.deleteCourseFromDatabase(course);
-        getCourses();
+        refreshView();
     }
 
     @Override
     public void OnCourseClick(int p) {
         Course course = mCourseList.get(p);
         Intent intent = new Intent(this, AddEditCourseActivity.class);
-        intent.putExtra(MainActivity.CLICKED_SEMESTER_NAME, semesterName);
+        intent.putExtra(MainActivity.CLICKED_SEMESTER_NAME, mSemesterName);
         intent.putExtra("type", 1);
         intent.putExtra("courseName", course.getName());
         intent.putExtra("courseCredits", course.getCredits());
@@ -194,15 +175,15 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
     @Override
     public void OnCourseLongClick(final int p) {
         mAlertDialog = new AlertDialog.Builder(this)
-                .setTitle("Delete Course")
+                .setTitle("Delete Course?")
                 .setMessage("Delete " + mCourseList.get(p).getName() + "?")
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface dialog, int whichButton) {
                         deleteCourse(p);
                     }})
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mCourseRecyclerView.getAdapter().notifyItemChanged(p);
