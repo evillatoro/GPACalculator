@@ -25,7 +25,7 @@ public class Semester {
             throw new IllegalArgumentException("course is null");
         }
 
-        this.courseList.add(newCourse);
+        this.courseList.add(0,newCourse);
 
         //TODO: fix after changing what is stored in database
         if (newCourse.getGrade() != -1) {

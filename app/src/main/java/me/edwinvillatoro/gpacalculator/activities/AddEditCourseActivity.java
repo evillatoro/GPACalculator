@@ -87,7 +87,6 @@ public class AddEditCourseActivity extends AppCompatActivity {
             }
         }
 
-        //TODO: change activity title to course name if there is one
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
